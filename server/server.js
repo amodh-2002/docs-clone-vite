@@ -1,14 +1,22 @@
 const mongoose = require("mongoose")
 const Document = require("./Document")
 
-mongoose.connect('mongodb://127.0.0.1/google-docs-clone');
+mongoose.connect('mongodb://127.0.0.1/google-docs-clone', { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true 
+})
+.then(() => {
+  console.log('MongoDB connected');
+})
+.catch((error) => {
+  console.error('MongoDB connection error:', error);
+});;
 
 
 const io = require("socket.io")(3001, {
   cors: {
-    origin: "https://docs-clone-vite.vercel.app",
+    origin: "https://docs-clone-vite-client.vercel.app",
     methods: ["GET", "POST"],
-    credentials:true
   },
 })
 
@@ -16,9 +24,13 @@ const defaultValue = ""
 
 io.on("connection", socket => {
   socket.on("get-document", async documentId => {
-    const document = await findOrCreateDocument(documentId)
-    socket.join(documentId)
-    socket.emit("load-document", document.data)
+    try {
+      const document = await findOrCreateDocument(documentId)
+      socket.join(documentId)
+      socket.emit("load-document", document.data)
+    } catch (error) {
+      console.error('Error handling get-document event:', error);
+    }
 
     socket.on("send-changes", delta => {
       socket.broadcast.to(documentId).emit("receive-changes", delta)
@@ -33,7 +45,16 @@ io.on("connection", socket => {
 async function findOrCreateDocument(id) {
   if (id == null) return
 
-  const document = await Document.findById(id)
-  if (document) return document
-  return await Document.create({ _id: id, data: defaultValue })
+  try {
+    const document = await Document.findById(id)
+    if (document) {
+      return document
+    } else {
+      return await Document.create({ _id: id, data: defaultValue })
+    }
+  } catch (error) {
+    console.error('Error finding or creating document:', error);
+    throw error; // Rethrow the error for higher-level handling
+  }
 }
+
