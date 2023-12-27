@@ -6,7 +6,7 @@ mongoose.connect('mongodb://127.0.0.1/google-docs-clone');
 
 const io = require("socket.io")(3001, {
   cors: {
-    origin: "https://docs-clone-vite.vercel.app",
+    origin: "https://docs-clone-vite-client.vercel.app",
     methods: ["GET", "POST"],
     credentials:true
   },
