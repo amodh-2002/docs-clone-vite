@@ -19,7 +19,7 @@ const io = require("socket.io")(3001, {
     methods: ["GET", "POST"],
   },
 })
-
+console.log("Hello connected")
 const defaultValue = ""
 
 io.on("connection", socket => {
@@ -45,16 +45,7 @@ io.on("connection", socket => {
 async function findOrCreateDocument(id) {
   if (id == null) return
 
-  try {
-    const document = await Document.findById(id)
-    if (document) {
-      return document
-    } else {
-      return await Document.create({ _id: id, data: defaultValue })
-    }
-  } catch (error) {
-    console.error('Error finding or creating document:', error);
-    throw error; // Rethrow the error for higher-level handling
-  }
+  const document = await Document.findById(id)
+  if (document) return document
+  return await Document.create({ _id: id, data: defaultValue })
 }
-
