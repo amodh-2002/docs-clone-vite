@@ -8,10 +8,9 @@ const io = require("socket.io")(3001, {
   cors: {
     origin: "https://docs-clone-vite-client.vercel.app",
     methods: ["GET", "POST"],
-    credentials:true
   },
 })
-
+console.log("Hello connected")
 const defaultValue = ""
 
 io.on("connection", socket => {
